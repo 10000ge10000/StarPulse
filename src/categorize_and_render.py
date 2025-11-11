@@ -71,6 +71,21 @@ def _build_trend_map(repos: Iterable[str], history_len: int | None = None) -> Di
     return out
 
 
+def _fmt_date(ts: str | None) -> str:
+    if not ts or not isinstance(ts, str):
+        return ""
+    # Accept ISO formats like 2025-11-11T07:56:59.473243+00:00 or ending with Z
+    try:
+        # Normalize Zulu
+        t = ts.replace("Z", "+00:00")
+        from datetime import datetime
+        d = datetime.fromisoformat(t).date()
+        return d.isoformat()
+    except Exception:
+        # Fallback to first 10 chars if ISO-like
+        return ts[:10] if len(ts) >= 10 else ts
+
+
 def _md_link(repo_full_name: str) -> str:
     return f"[{repo_full_name}](https://github.com/{repo_full_name})"
 
@@ -116,9 +131,12 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
         return table
 
     md: List[str] = []
-    md.append(f"## Star 增长榜（{curr.get('timestamp', '')}）")
+    curr_date = _fmt_date(curr.get('timestamp'))
+    base_date = _fmt_date(diff_res.get('base_timestamp'))
+    md.append(f"## Star 增长榜（{curr_date}）")
     md.append("")
-    md.append(f"基线快照：{diff_res.get('base_timestamp')}")
+    # Beauty touch with calendar emoji
+    md.append(f"🗓️ 基线快照：{base_date}")
     md.append("")
     stats = diff_res.get("stats", {})
     if stats:
