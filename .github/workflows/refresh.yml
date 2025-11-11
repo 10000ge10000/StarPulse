@@ -25,6 +25,8 @@ jobs:
       - name: Run aggregation
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          # 可调整曝光门槛：默认 200；这里示例设置为 50 以更早发现潜力项目
+          MIN_STARS: '50'
         run: |
           python -m src.run_all
 
