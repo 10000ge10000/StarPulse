@@ -93,18 +93,25 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     trend_targets: List[str] = [x["repo"] for x in (cn + noncn + cn_growth + noncn_growth + cn_new + noncn_new)]
     trend_map = _build_trend_map(trend_targets, CONFIG.diff.trend_history_len)
 
+    def _project_cell(x: dict) -> str:
+        link = _md_link(x["repo"])
+        desc = _truncate(x.get("description"), CONFIG.diff.description_max_len)
+        if desc and desc != "-":
+            # 在链接下方放简介，小字号，避免拉宽表格
+            return f"{link}<br/><sub>{desc}</sub>"
+        return link
+
     def rows(items: List[dict]) -> List[List[str | int]]:
         table: List[List[str | int]] = []
         for x in items:
             table.append([
-                _md_link(x["repo"]),
+                _project_cell(x),
                 x.get("language") or "-",
                 x.get("stars_prev", 0),
                 x.get("stars_now", 0),
                 x.get("delta", 0),
                 f"{(x.get('growth_rate') or 0)*100:.2f}%",
                 trend_map.get(x["repo"], ""),
-                _truncate(x.get("description"), CONFIG.diff.description_max_len),
             ])
         return table
 
@@ -126,7 +133,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
             md.append(f"- 语言分布: {lang_line}")
         md.append("")
 
-    table_headers = ["项目", "语言", "Prev", "Now", "+", "%", "趋势", "简介"]
+    table_headers = ["项目", "语言", "Prev", "Now", "+", "%", "趋势"]
 
     md.append("## 中文项目（现有 Top）")
     md.append("")
