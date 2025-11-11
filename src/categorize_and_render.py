@@ -110,6 +110,8 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     cn_new, noncn_new = split_cn_noncn(top_new)
     top_growth = diff_res.get("top_growth", [])
     cn_growth, noncn_growth = split_cn_noncn(top_growth)
+    first_seen = diff_res.get("first_seen", [])
+    cn_first, noncn_first = split_cn_noncn(first_seen)
 
     trend_targets: List[str] = [x["repo"] for x in (cn + noncn + cn_growth + noncn_growth + cn_new + noncn_new)]
     trend_map = _build_trend_info(trend_targets, CONFIG.diff.trend_history_len)
@@ -202,6 +204,33 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     else:
         md.append("暂无上榜新项目")
     md.append("")
+
+    # 首次捕捉项目（无上一快照，下一次开始计算增量）
+    if first_seen:
+        md.append("## 首次捕捉项目（预热）")
+        md.append("")
+        md.append("> 这些项目是本次快照中首次出现，下一轮开始才会计算增量与增幅")
+        md.append("")
+        fs_headers = ["项目", "当前", "趋势"]
+
+        def fs_rows(items: List[dict]) -> List[List[str | int]]:
+            table: List[List[str | int]] = []
+            for x in items:
+                table.append([
+                    _project_cell(x),
+                    x.get("stars_now", x.get("stars") or 0),
+                    trend_map.get(x.get("repo"), ""),
+                ])
+            return table
+
+        if cn_first:
+            md.append("### 中文项目（首现）")
+            md.append(tabulate(fs_rows(cn_first), headers=fs_headers, tablefmt="github"))
+            md.append("")
+        if noncn_first:
+            md.append("### 非中文项目（首现）")
+            md.append(tabulate(fs_rows(noncn_first), headers=fs_headers, tablefmt="github"))
+            md.append("")
 
     content = "\n".join(md)
     path = os.path.join(save_dir, "LATEST.md")

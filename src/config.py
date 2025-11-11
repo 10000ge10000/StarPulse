@@ -15,7 +15,8 @@ class SearchConfig:
     languages: List[str] = field(default_factory=lambda: [
         "Python", "JavaScript", "TypeScript", "Go", "Rust", "Java", "C#", "C++", "C",
     ])
-    min_stars: int = 200
+    # 最低 star 门槛，支持环境变量 MIN_STARS 覆盖（便于降低首现项目曝光门槛）
+    min_stars: int = int(os.getenv("MIN_STARS", "200"))
     max_candidates: int = 80
     topics: List[str] = field(default_factory=lambda: [
         "ai", "ml", "llm", "web", "devops", "docker", "kubernetes", "data", "security", "mobile"
@@ -34,6 +35,7 @@ class DiffConfig:
     growth_top_n: int = 30                  # 增幅榜单独 Top N
     trend_history_len: int = 30             # 趋势图使用的历史快照窗口长度
     description_max_len: int = 80           # 描述在表格中截断的最大字符数
+    first_seen_max: int = 30                # 首次捕捉项目显示的最大数量
 
 
 @dataclass
