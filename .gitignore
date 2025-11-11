@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Data and outputs
+/data/
+/output/
+!output/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db

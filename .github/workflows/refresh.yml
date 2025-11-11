@@ -1,0 +1,38 @@
+name: Refresh Star Growth
+
+on:
+  schedule:
+    - cron: '0 4,16 * * *' # 北京时间 12:00 与 00:00
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run aggregation
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          python -m src.run_all
+
+      - name: Commit & push results
+        if: success()
+        run: |
+          git config user.email 'action@github.com'
+          git config user.name 'github-actions'
+          git add data/snapshots output/LATEST.md output/latest.json || true
+          git commit -m 'chore: update star growth snapshot' || echo 'No changes'
+          git push || echo 'Push skipped'
