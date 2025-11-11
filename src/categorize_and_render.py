@@ -71,6 +71,17 @@ def _build_trend_map(repos: Iterable[str], history_len: int | None = None) -> Di
     return out
 
 
+def _md_link(repo_full_name: str) -> str:
+    return f"[{repo_full_name}](https://github.com/{repo_full_name})"
+
+
+def _truncate(text: str | None, limit: int) -> str:
+    if not text:
+        return "-"
+    t = text.strip().replace("\n", " ")
+    return t if len(t) <= limit else (t[:limit - 1] + "…")
+
+
 def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     top = diff_res.get("top", [])
     cn, noncn = split_cn_noncn(top)
@@ -86,13 +97,14 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
         table: List[List[str | int]] = []
         for x in items:
             table.append([
-                x["repo"],
+                _md_link(x["repo"]),
                 x.get("language") or "-",
                 x.get("stars_prev", 0),
                 x.get("stars_now", 0),
                 x.get("delta", 0),
                 f"{(x.get('growth_rate') or 0)*100:.2f}%",
                 trend_map.get(x["repo"], ""),
+                _truncate(x.get("description"), CONFIG.diff.description_max_len),
             ])
         return table
 
@@ -103,7 +115,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("")
     stats = diff_res.get("stats", {})
     if stats:
-        md.append("**统计摘要**")
+        md.append("### 统计摘要")
         md.append("")
         md.append(f"- 参与 diff 仓库数：{stats.get('total_diff_repos')} | 展示 Top: {stats.get('top_n')} | 新项目窗口：{stats.get('new_repo_days')} 天")
         cats = stats.get('categories', {})
@@ -114,14 +126,12 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
             md.append(f"- 语言分布: {lang_line}")
         md.append("")
 
-    table_headers = ["Repo", "Lang", "Prev", "Now", "+", "%", "Trend"]
+    table_headers = ["项目", "语言", "Prev", "Now", "+", "%", "趋势", "简介"]
 
     md.append("## 中文项目（现有 Top）")
     md.append("")
     if cn:
-        md.append("```text")
-        md.append(tabulate(rows(cn), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(cn), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜项目")
     md.append("")
@@ -129,9 +139,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("## 非中文项目（现有 Top）")
     md.append("")
     if noncn:
-        md.append("```text")
-        md.append(tabulate(rows(noncn), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(noncn), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜项目")
     md.append("")
@@ -139,9 +147,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("## 中文项目（增幅 Top）")
     md.append("")
     if cn_growth:
-        md.append("```text")
-        md.append(tabulate(rows(cn_growth), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(cn_growth), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜项目")
     md.append("")
@@ -149,9 +155,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("## 非中文项目（增幅 Top）")
     md.append("")
     if noncn_growth:
-        md.append("```text")
-        md.append(tabulate(rows(noncn_growth), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(noncn_growth), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜项目")
     md.append("")
@@ -159,9 +163,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("## 新项目 - 中文")
     md.append("")
     if cn_new:
-        md.append("```text")
-        md.append(tabulate(rows(cn_new), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(cn_new), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜新项目")
     md.append("")
@@ -169,9 +171,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     md.append("## 新项目 - 非中文")
     md.append("")
     if noncn_new:
-        md.append("```text")
-        md.append(tabulate(rows(noncn_new), headers=table_headers, tablefmt="plain"))
-        md.append("```")
+        md.append(tabulate(rows(noncn_new), headers=table_headers, tablefmt="github"))
     else:
         md.append("暂无上榜新项目")
     md.append("")

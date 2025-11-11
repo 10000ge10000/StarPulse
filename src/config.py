@@ -33,6 +33,7 @@ class DiffConfig:
     min_delta_for_huge: int = 2             # 超大仓库至少需要该增量才计入榜单
     growth_top_n: int = 30                  # 增幅榜单独 Top N
     trend_history_len: int = 30             # 趋势图使用的历史快照窗口长度
+    description_max_len: int = 80           # 描述在表格中截断的最大字符数
 
 
 @dataclass
