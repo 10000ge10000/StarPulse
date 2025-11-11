@@ -10,6 +10,8 @@ from .categorize_and_render import render_markdown, render_json
 
 
 def main():
+    # Ensure required directories exist on fresh runners
+    os.makedirs(CONFIG.data_dir, exist_ok=True)
     os.makedirs(CONFIG.output_dir, exist_ok=True)
 
     # 1) 候选仓库（可定期更新集合；此处每次运行都刷新）

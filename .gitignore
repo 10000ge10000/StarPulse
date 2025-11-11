@@ -33,6 +33,7 @@ ENV/
 
 # Data and outputs
 /data/
+!data/snapshots/.gitkeep
 /output/
 !output/.gitkeep
 
