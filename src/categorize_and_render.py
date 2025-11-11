@@ -55,7 +55,8 @@ def _spark(values: List[int]) -> str:
     return "".join(out_chars)
 
 
-def _build_trend_map(repos: Iterable[str], history_len: int | None = None) -> Dict[str, str]:
+def _build_trend_info(repos: Iterable[str], history_len: int | None = None) -> Dict[str, str]:
+    """Return mapping repo -> formatted trend string: `spark` + arrow emoji."""
     recent = _load_recent_snapshots(history_len)
     names = list(set(repos))
     series: Dict[str, List[int]] = {n: [] for n in names}
@@ -67,7 +68,12 @@ def _build_trend_map(repos: Iterable[str], history_len: int | None = None) -> Di
     out: Dict[str, str] = {}
     for n, vals in series.items():
         cleaned = [v for v in vals if isinstance(v, int)]
-        out[n] = _spark(cleaned)
+        spark = _spark(cleaned)
+        arrow = "➡️"
+        if len(cleaned) >= 2:
+            diff = cleaned[-1] - cleaned[-2]
+            arrow = "⬆️" if diff > 0 else ("⬇️" if diff < 0 else "➡️")
+        out[n] = (f"`{spark}` {arrow}" if spark else arrow)
     return out
 
 
@@ -106,7 +112,7 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     cn_growth, noncn_growth = split_cn_noncn(top_growth)
 
     trend_targets: List[str] = [x["repo"] for x in (cn + noncn + cn_growth + noncn_growth + cn_new + noncn_new)]
-    trend_map = _build_trend_map(trend_targets, CONFIG.diff.trend_history_len)
+    trend_map = _build_trend_info(trend_targets, CONFIG.diff.trend_history_len)
 
     def _project_cell(x: dict) -> str:
         link = _md_link(x["repo"])
@@ -121,7 +127,6 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
         for x in items:
             table.append([
                 _project_cell(x),
-                x.get("language") or "-",
                 x.get("stars_prev", 0),
                 x.get("stars_now", 0),
                 x.get("delta", 0),
@@ -145,13 +150,10 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
         md.append(f"- 参与 diff 仓库数：{stats.get('total_diff_repos')} | 展示 Top: {stats.get('top_n')} | 新项目窗口：{stats.get('new_repo_days')} 天")
         cats = stats.get('categories', {})
         md.append(f"- 中文: {cats.get('chinese', 0)} | 非中文: {cats.get('non_chinese', 0)} | 新项目数: {stats.get('top_new_count')}")
-        langs = stats.get('languages', {})
-        if langs:
-            lang_line = ", ".join(f"{k}:{v}" for k, v in sorted(langs.items(), key=lambda x: -x[1]))
-            md.append(f"- 语言分布: {lang_line}")
+        # 已按需求移除语言分布行
         md.append("")
 
-    table_headers = ["项目", "语言", "Prev", "Now", "+", "%", "趋势"]
+    table_headers = ["项目", "上次", "当前", "+", "%", "趋势"]
 
     md.append("## 中文项目（现有 Top）")
     md.append("")
