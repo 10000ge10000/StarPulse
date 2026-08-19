@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    groups:
+      tenacity:
+        update-type: "version-update"
+        confidence: "low"
+      pytest:
+        update-type: "version-update"
+        confidence: "low"
+      requests:
+        update-type: "version-update"
+        confidence: "low"
+      PyYAML:
+        update-type: "version-update"
+        confidence: "low"

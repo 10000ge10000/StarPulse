@@ -1,0 +1,24 @@
+[project]
+name = "StarPulse"
+version = "2.0.0"
+description = "GitHub project star growth monitor - daily trending analysis with Chinese/non-Chinese split"
+requires-python = ">=3.10"
+dependencies = [
+    "PyGithub>=2.5.0",
+    "requests>=2.32.0",
+    "tenacity>=9.0.0",
+    "tabulate>=0.9.0",
+    "PyYAML>=6.0.2",
+    "charset-normalizer>=3.3.2",
+]
+
+[project.scripts]
+star-pulse = "src.run_all:main"
+
+[tool.pytest.ini_options]
+testpath = "tests"
+pythonpath = ["."]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.backends._legacy:_Backend"

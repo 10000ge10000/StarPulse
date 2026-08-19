@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import List, Dict, Set
 from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
@@ -8,6 +9,8 @@ from github import Github
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from .config import CONFIG
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -50,6 +53,7 @@ def _get_client() -> Github:
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def _search_once(client: Github, q: str):
+    logger.debug("search_repositories: query=%s", q)
     return client.search_repositories(query=q, sort="stars", order="desc")
 
 
@@ -62,7 +66,12 @@ def fetch_candidates(max_count: int | None = None) -> Dict[str, RepoBasic]:
     out: Dict[str, RepoBasic] = {}
 
     for q in queries:
-        results = _search_once(client, q)
+        logger.info("fetch_candidates: querying: %s", q)
+        try:
+            results = _search_once(client, q)
+        except Exception as e:
+            logger.error("fetch_candidates: search_repositories failed: %s", e, exc_info=True)
+            continue
         for repo in results[:max_count]:  # 每个查询最多取 max_count，后续会去重
             fn = repo.full_name
             if fn in seen:
@@ -71,7 +80,8 @@ def fetch_candidates(max_count: int | None = None) -> Dict[str, RepoBasic]:
             topics = []
             try:
                 topics = repo.get_topics() or []
-            except Exception:
+            except Exception as e:
+                logger.warning("fetch_candidates: get_topics failed for %s: %s", fn, e)
                 topics = []
             out[fn] = RepoBasic(
                 full_name=fn,
@@ -89,6 +99,7 @@ def fetch_candidates(max_count: int | None = None) -> Dict[str, RepoBasic]:
         if len(out) >= max_count:
             break
 
+    logger.info("fetch_candidates: total_candidates=%d", len(out))
     return out
 
 

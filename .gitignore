@@ -1,42 +1,32 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*~
+.env
+*.env
+.env.local
+
+# Virtual Environments
+venv/
+env/
+.env/
+
+# Data & Output
+data/snapshots/*.json
+output/LATEST.md
+output/latest.json
+
+# pytest
+.pytest_cache/
+.coverage
 
 # Distribution / packaging
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
 *.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-.env
-.env.local
 
 # IDE
 .vscode/
 .idea/
-
-# Data and outputs
-/data/
-!data/snapshots/.gitkeep
-/output/
-!output/.gitkeep
-
-# OS
-.DS_Store
-Thumbs.db

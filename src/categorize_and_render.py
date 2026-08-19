@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from typing import Dict, List, Tuple, Iterable
 from tabulate import tabulate
 
 from .config import CONFIG
 from .classify_utils import is_chinese_project
+
+logger = logging.getLogger(__name__)
 
 README_BEGIN = "<!-- BEGIN_AUTOGEN_RESULT -->"
 README_END = "<!-- END_AUTOGEN_RESULT -->"
@@ -104,6 +107,7 @@ def _truncate(text: str | None, limit: int) -> str:
 
 
 def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
+    logger.info("render_markdown: starting render, diff_res keys: %s", list(diff_res.keys()))
     top = diff_res.get("top", [])
     cn, noncn = split_cn_noncn(top)
     top_new = diff_res.get("top_new", [])
@@ -112,6 +116,9 @@ def render_markdown(curr: dict, diff_res: dict, save_dir: str) -> str:
     cn_growth, noncn_growth = split_cn_noncn(top_growth)
     first_seen = diff_res.get("first_seen", [])
     cn_first, noncn_first = split_cn_noncn(first_seen)
+
+    logger.debug("render_markdown: top=%d, cn=%d, noncn=%d, top_new=%d, top_growth=%d, first_seen=%d",
+                 len(top), len(cn), len(noncn), len(top_new), len(top_growth), len(first_seen))
 
     trend_targets: List[str] = [x["repo"] for x in (cn + noncn + cn_growth + noncn_growth + cn_new + noncn_new)]
     trend_map = _build_trend_info(trend_targets, CONFIG.diff.trend_history_len)

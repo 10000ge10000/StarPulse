@@ -2,12 +2,16 @@
 
 > 每日两次（北京时间 00:00 & 12:00）自动抓取候选仓库最新 Star，并与上一快照对比，输出“增量 / 增幅”双榜 + 新项目榜，按中文 / 非中文拆分展示。
 
-[![Refresh Status](https://github.com/10000ge10000/StarPulse/actions/workflows/refresh.yml/badge.svg)](https://github.com/10000ge10000/StarPulse/actions/workflows/refresh.yml)
+[![Blog](https://img.shields.io/badge/Blog-910501.xyz-orange)](https://blog.910501.xyz/)
+[![Bilibili](https://img.shields.io/badge/B%E7%AB%99-59438380-00a1d6?logo=bilibili)](https://space.bilibili.com/59438380)
+[![YouTube](https://img.shields.io/badge/YouTube-10000%20AI%20Share-ff0000?logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCqgvZnCN9-9pZcL4SWxmnDw)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-👉 **立即查看今日榜单：** [跳转到今日榜单](#每日榜单)  
-（或收藏本页，榜单每日自动更新两次）
+## 项目说明
 
-## 特点
+StarPulse 是一个 GitHub 项目星标增长监控工具，它定时抓取 GitHub 项目数据，计算过去一次运行以来的 Star 增长，并按“中文项目 / 非中文项目”两大类输出榜单与趋势信息。项目旨在帮助用户发现具有潜力的开源项目， particularly 中文项目。
+
+## 特性
 
 - ⏱ 定时自动：GitHub Actions 定时运行，无需人工干预
 - 🌓 双指标洞察：绝对增量与相对增幅并行，避免大盘仓库“压榜”
@@ -16,109 +20,129 @@
 - 📈 趋势火花线：30 次历史星数生成迷你 sparkline，直观走势
 - 🧹 噪声过滤：超大仓库微小增量（<2）不进入主榜，减少信息噪声
 
-更多使用说明与配置详见：`README_FULL.md`。
+## 快速开始
 
+### 本地运行
 
-## 每日榜单
+```bash
+# 安装依赖
+pip install PyGithub requests tenacity tabulate PyYAML
 
-<!-- BEGIN_AUTOGEN_RESULT -->
+# 设置 GitHub Token
+export GH_TOKEN="your_github_personal_access_token"
 
-## Star 增长榜（2025-11-11）
+# 运行主脚本
+python -m src.run_all
+```
 
-🗓️ 基线快照：2025-11-11
+### GitHub Actions
 
-### 统计摘要
+本项目内置 `.github/workflows/refresh.yml`，默认在每天北京时间 0 点与 12 点（UTC 16:00 与 04:00）运行一次。
 
-- 参与 diff 仓库数：66 | 展示 Top: 30 | 新项目窗口：30 天
-- 中文: 6 | 非中文: 24 | 新项目数: 0
+1. 仓库创建并推送代码（含 `.github/workflows/refresh.yml`）
+2. 在仓库 Settings → Secrets 配置 `GH_TOKEN`
+3. 首次手动运行工作流，观察输出
+4. 检查提交权限
 
-## 中文项目（现有 Top）
+## 配置
 
-| 项目                                                                                                                                                                                |    上次 |    当前 |   + | %     | 趋势                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|-------|-----|-------|--------------------|
-| [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps)<br/><sub>Collection of awesome LLM apps with AI Agents and RAG using OpenAI, Anthropic, …</sub> | 76724 | 76730 |   6 | 0.01% | `▁▁▁▁▃▄▄▅▆▆▇▇█` ⬆️ |
-| [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics)<br/><sub>Ultralytics YOLO 🚀</sub>                                                                           | 48521 | 48524 |   3 | 0.01% | `▁▁▁▁▂▂▂▄▄▅▆▆█` ⬆️ |
-| [OpenHands/OpenHands](https://github.com/OpenHands/OpenHands)<br/><sub>🙌 OpenHands: Code Less, Make More</sub>                                                                    | 64906 | 64908 |   2 | 0.00% | `▁▁▁▁▂▂▂▅▅▅▆▆█` ⬆️ |
-| [Alvin9999/new-pac](https://github.com/Alvin9999/new-pac)<br/><sub>翻墙-科学上网、自由上网、免费科学上网、免费翻墙、fanqiang、油管youtube/视频下载、软件、VPN、一键翻墙浏览器，vps一键搭建翻墙服务器脚本/…</sub>                         | 70849 | 70851 |   2 | 0.00% | `▁▁▁▁▁▂▂▃▃▄▆▆█` ⬆️ |
-| [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT)<br/><sub>🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Languag…</sub>           | 59358 | 59359 |   1 | 0.00% | `▁▁▁▂▃▃▃▅▅▅▅▆█` ⬆️ |
-| [PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)<br/><sub>Turn any PDF or image document into structured data for your AI. A powerful, li…</sub>               | 63374 | 63375 |   1 | 0.00% | `▁▁▁▁▂▄▄▅▆▆▇▇█` ⬆️ |
+可在 `src/config.py` 中调整：
 
-## 非中文项目（现有 Top）
+- 候选搜索关键词、语言白名单、最小 star、候选上限
+- 增长率计算的最小基数过滤
+- 中文检测规则（topics/描述/README 片段中的中文比例）
+- 增量榜数量：`DiffConfig.top_n`
+- 增幅榜数量：`DiffConfig.growth_top_n`
+- “新项目”窗口天数：`DiffConfig.new_repo_days` (默认 30)
+- 趋势窗口快照数：`DiffConfig.trend_history_len` (默认 30)
+- 噪声过滤阈值：`DiffConfig.huge_repo_star_threshold` (默认 100000) 与 `DiffConfig.min_delta_for_huge` (默认 2)
+- 首现项目显示数量：`DiffConfig.first_seen_max` (默认 20)
 
-| 项目                                                                                                                                                                                                                                |    上次 |    当前 |   + | %     | 趋势                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|-------|-----|-------|--------------------|
-| [pathwaycom/pathway](https://github.com/pathwaycom/pathway)<br/><sub>Python ETL framework for stream processing, real-time analytics, LLM pipelines,…</sub>                                                                       | 49412 | 49422 |  10 | 0.02% | `▁▁▁▁▁▁▁▁▁▄▅▆█` ⬆️ |
-| [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT)<br/><sub>The simplest, fastest repository for training/finetuning medium-sized GPTs.</sub>                                                                                | 49308 | 49312 |   4 | 0.01% | `▁▁▁▁▂▄▄▅▅▆▆▆█` ⬆️ |
-| [comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI)<br/><sub>The most powerful and modular diffusion model GUI, api and backend with a graph…</sub>                                                               | 93273 | 93276 |   3 | 0.00% | `▁▁▁▁▂▄▄▅▅▆▆▇█` ⬆️ |
-| [docling-project/docling](https://github.com/docling-project/docling)<br/><sub>Get your documents ready for gen AI</sub>                                                                                                          | 43424 | 43426 |   2 | 0.00% | `▁▁▁▁▃▃▃▅▅▅▆▇█` ⬆️ |
-| [odoo/odoo](https://github.com/odoo/odoo)<br/><sub>Odoo. Open Source Apps To Grow Your Business.</sub>                                                                                                                            | 47153 | 47155 |   2 | 0.00% | `▁▁▁▂▃▄▄▅▆▆▆▆█` ⬆️ |
-| [opendatalab/MinerU](https://github.com/opendatalab/MinerU)<br/><sub>Transforms complex documents like PDFs into LLM-ready markdown/JSON for your Ag…</sub>                                                                       | 48508 | 48510 |   2 | 0.00% | `▁▁▁▂▃▄▄▅▅▆▇▇█` ⬆️ |
-| [microsoft/autogen](https://github.com/microsoft/autogen)<br/><sub>A programming framework for agentic AI</sub>                                                                                                                   | 51575 | 51577 |   2 | 0.00% | `▁▁▁▁▂▅▅▆▆▆▆▆█` ⬆️ |
-| [OpenBB-finance/OpenBB](https://github.com/OpenBB-finance/OpenBB)<br/><sub>Financial data platform for analysts, quants and AI agents.</sub>                                                                                      | 54440 | 54442 |   2 | 0.00% | `▁▁▁▁▂▂▃▆▆▆▇▇█` ⬆️ |
-| [vllm-project/vllm](https://github.com/vllm-project/vllm)<br/><sub>A high-throughput and memory-efficient inference and serving engine for LLMs</sub>                                                                             | 62716 | 62718 |   2 | 0.00% | `▁▁▂▂▃▄▅▅▆▆▆▇█` ⬆️ |
-| [home-assistant/core](https://github.com/home-assistant/core)<br/><sub>:house_with_garden: Open source home automation that puts local control and pri…</sub>                                                                     | 82492 | 82494 |   2 | 0.00% | `▁▁▁▁▁▁▁▃▃▃▃▃█` ⬆️ |
-| [freqtrade/freqtrade](https://github.com/freqtrade/freqtrade)<br/><sub>Free, open source crypto trading bot</sub>                                                                                                                 | 44492 | 44493 |   1 | 0.00% | `▁▁▂▂▃▄▄▆▇▇▇▇█` ⬆️ |
-| [deepfakes/faceswap](https://github.com/deepfakes/faceswap)<br/><sub>Deepfakes Software For All</sub>                                                                                                                             | 54694 | 54695 |   1 | 0.00% | `▁▁▁▁▁▁▁▃▃▃▅▅█` ⬆️ |
-| [unclecode/crawl4ai](https://github.com/unclecode/crawl4ai)<br/><sub>🚀🤖 Crawl4AI: Open-source LLM Friendly Web Crawler & Scraper. Don't be shy, join…</sub>                                                                       | 55653 | 55654 |   1 | 0.00% | `▁▁▂▂▄▅▆▇▇▇▇▇█` ⬆️ |
-| [commaai/openpilot](https://github.com/commaai/openpilot)<br/><sub>openpilot is an operating system for robotics. Currently, it upgrades the drive…</sub>                                                                         | 58821 | 58822 |   1 | 0.00% | `▁▁▁▁▁▁▁▁▁▄▄▄█` ⬆️ |
-| [hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)<br/><sub>Unified Efficient Fine-Tuning of 100+ LLMs & VLMs (ACL 2024)</sub>                                                                                     | 62227 | 62228 |   1 | 0.00% | `▁▁▁▁▃▃▄▆▆▇▇▇█` ⬆️ |
-| [localstack/localstack](https://github.com/localstack/localstack)<br/><sub>💻 A fully functional local AWS cloud stack. Develop and test your cloud & Serve…</sub>                                                                 | 62801 | 62802 |   1 | 0.00% | `▁▁▁▁▃▄▄▆▆▆▇▇█` ⬆️ |
-| [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn)<br/><sub>scikit-learn: machine learning in Python</sub>                                                                                                 | 63985 | 63986 |   1 | 0.00% | `▁▁▁▁▁▁▁▄▄▄▄▄█` ⬆️ |
-| [labmlai/annotated_deep_learning_paper_implementations](https://github.com/labmlai/annotated_deep_learning_paper_implementations)<br/><sub>🧑‍🏫 60+ Implementations/tutorials of deep learning papers with side-by-side not…</sub> | 64235 | 64236 |   1 | 0.00% | `▁▁▁▁▂▃▄▆▆▆▆▇█` ⬆️ |
-| [swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)<br/><sub>A list of useful payloads and bypass for Web Application Security and Pentest/C…</sub>                                           | 71543 | 71544 |   1 | 0.00% | `▁▁▁▁▁▁▁▁▁▁▁▄█` ⬆️ |
-| [browser-use/browser-use](https://github.com/browser-use/browser-use)<br/><sub>🌐 Make websites accessible for AI agents. Automate tasks online with ease.</sub>                                                                   | 72383 | 72384 |   1 | 0.00% | `▁▁▁▁▂▄▄▄▄▆▇▇█` ⬆️ |
-| [microsoft/markitdown](https://github.com/microsoft/markitdown)<br/><sub>Python tool for converting files and office documents to Markdown.</sub>                                                                                 | 82838 | 82839 |   1 | 0.00% | `▁▁▁▁▁▂▂▅▅▆▇▇█` ⬆️ |
-| [pytorch/pytorch](https://github.com/pytorch/pytorch)<br/><sub>Tensors and Dynamic neural networks in Python with strong GPU acceleration</sub>                                                                                   | 94947 | 94947 |   0 | 0.00% | `▁▁▁▁▁▃▄▆▇▇███` ➡️ |
-| [fastapi/fastapi](https://github.com/fastapi/fastapi)<br/><sub>FastAPI framework, high performance, easy to learn, fast to code, ready for pro…</sub>                                                                             | 91762 | 91762 |   0 | 0.00% | `▁▁▂▃▅▅▅▆▆▆▆██` ➡️ |
-| [openai/whisper](https://github.com/openai/whisper)<br/><sub>Robust Speech Recognition via Large-Scale Weak Supervision</sub>                                                                                                     | 90663 | 90663 |   0 | 0.00% | `▁▂▁▂▃▃▃▇▇▇███` ➡️ |
+## 部署
 
-## 中文项目（增幅 Top）
+### Docker 部署
 
-| 项目                                                                                                                                                                                |    上次 |    当前 |   + | %     | 趋势                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|-------|-----|-------|--------------------|
-| [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps)<br/><sub>Collection of awesome LLM apps with AI Agents and RAG using OpenAI, Anthropic, …</sub> | 76724 | 76730 |   6 | 0.01% | `▁▁▁▁▃▄▄▅▆▆▇▇█` ⬆️ |
-| [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics)<br/><sub>Ultralytics YOLO 🚀</sub>                                                                           | 48521 | 48524 |   3 | 0.01% | `▁▁▁▁▂▂▂▄▄▅▆▆█` ⬆️ |
-| [OpenHands/OpenHands](https://github.com/OpenHands/OpenHands)<br/><sub>🙌 OpenHands: Code Less, Make More</sub>                                                                    | 64906 | 64908 |   2 | 0.00% | `▁▁▁▁▂▂▂▅▅▅▆▆█` ⬆️ |
-| [Alvin9999/new-pac](https://github.com/Alvin9999/new-pac)<br/><sub>翻墙-科学上网、自由上网、免费科学上网、免费翻墙、fanqiang、油管youtube/视频下载、软件、VPN、一键翻墙浏览器，vps一键搭建翻墙服务器脚本/…</sub>                         | 70849 | 70851 |   2 | 0.00% | `▁▁▁▁▁▂▂▃▃▄▆▆█` ⬆️ |
-| [FoundationAgents/MetaGPT](https://github.com/FoundationAgents/MetaGPT)<br/><sub>🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Languag…</sub>           | 59358 | 59359 |   1 | 0.00% | `▁▁▁▂▃▃▃▅▅▅▅▆█` ⬆️ |
-| [PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)<br/><sub>Turn any PDF or image document into structured data for your AI. A powerful, li…</sub>               | 63374 | 63375 |   1 | 0.00% | `▁▁▁▁▂▄▄▅▆▆▇▇█` ⬆️ |
+```dockerfile
+FROM python:3.11-slim
 
-## 非中文项目（增幅 Top）
+WORKDIR /app
 
-| 项目                                                                                                                                                                                                                                |    上次 |    当前 |   + | %     | 趋势                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|-------|-----|-------|--------------------|
-| [pathwaycom/pathway](https://github.com/pathwaycom/pathway)<br/><sub>Python ETL framework for stream processing, real-time analytics, LLM pipelines,…</sub>                                                                       | 49412 | 49422 |  10 | 0.02% | `▁▁▁▁▁▁▁▁▁▄▅▆█` ⬆️ |
-| [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT)<br/><sub>The simplest, fastest repository for training/finetuning medium-sized GPTs.</sub>                                                                                | 49308 | 49312 |   4 | 0.01% | `▁▁▁▁▂▄▄▅▅▆▆▆█` ⬆️ |
-| [docling-project/docling](https://github.com/docling-project/docling)<br/><sub>Get your documents ready for gen AI</sub>                                                                                                          | 43424 | 43426 |   2 | 0.00% | `▁▁▁▁▃▃▃▅▅▅▆▇█` ⬆️ |
-| [odoo/odoo](https://github.com/odoo/odoo)<br/><sub>Odoo. Open Source Apps To Grow Your Business.</sub>                                                                                                                            | 47153 | 47155 |   2 | 0.00% | `▁▁▁▂▃▄▄▅▆▆▆▆█` ⬆️ |
-| [opendatalab/MinerU](https://github.com/opendatalab/MinerU)<br/><sub>Transforms complex documents like PDFs into LLM-ready markdown/JSON for your Ag…</sub>                                                                       | 48508 | 48510 |   2 | 0.00% | `▁▁▁▂▃▄▄▅▅▆▇▇█` ⬆️ |
-| [microsoft/autogen](https://github.com/microsoft/autogen)<br/><sub>A programming framework for agentic AI</sub>                                                                                                                   | 51575 | 51577 |   2 | 0.00% | `▁▁▁▁▂▅▅▆▆▆▆▆█` ⬆️ |
-| [OpenBB-finance/OpenBB](https://github.com/OpenBB-finance/OpenBB)<br/><sub>Financial data platform for analysts, quants and AI agents.</sub>                                                                                      | 54440 | 54442 |   2 | 0.00% | `▁▁▁▁▂▂▃▆▆▆▇▇█` ⬆️ |
-| [comfyanonymous/ComfyUI](https://github.com/comfyanonymous/ComfyUI)<br/><sub>The most powerful and modular diffusion model GUI, api and backend with a graph…</sub>                                                               | 93273 | 93276 |   3 | 0.00% | `▁▁▁▁▂▄▄▅▅▆▆▇█` ⬆️ |
-| [vllm-project/vllm](https://github.com/vllm-project/vllm)<br/><sub>A high-throughput and memory-efficient inference and serving engine for LLMs</sub>                                                                             | 62716 | 62718 |   2 | 0.00% | `▁▁▂▂▃▄▅▅▆▆▆▇█` ⬆️ |
-| [home-assistant/core](https://github.com/home-assistant/core)<br/><sub>:house_with_garden: Open source home automation that puts local control and pri…</sub>                                                                     | 82492 | 82494 |   2 | 0.00% | `▁▁▁▁▁▁▁▃▃▃▃▃█` ⬆️ |
-| [freqtrade/freqtrade](https://github.com/freqtrade/freqtrade)<br/><sub>Free, open source crypto trading bot</sub>                                                                                                                 | 44492 | 44493 |   1 | 0.00% | `▁▁▂▂▃▄▄▆▇▇▇▇█` ⬆️ |
-| [deepfakes/faceswap](https://github.com/deepfakes/faceswap)<br/><sub>Deepfakes Software For All</sub>                                                                                                                             | 54694 | 54695 |   1 | 0.00% | `▁▁▁▁▁▁▁▃▃▃▅▅█` ⬆️ |
-| [unclecode/crawl4ai](https://github.com/unclecode/crawl4ai)<br/><sub>🚀🤖 Crawl4AI: Open-source LLM Friendly Web Crawler & Scraper. Don't be shy, join…</sub>                                                                       | 55653 | 55654 |   1 | 0.00% | `▁▁▂▂▄▅▆▇▇▇▇▇█` ⬆️ |
-| [commaai/openpilot](https://github.com/commaai/openpilot)<br/><sub>openpilot is an operating system for robotics. Currently, it upgrades the drive…</sub>                                                                         | 58821 | 58822 |   1 | 0.00% | `▁▁▁▁▁▁▁▁▁▄▄▄█` ⬆️ |
-| [hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)<br/><sub>Unified Efficient Fine-Tuning of 100+ LLMs & VLMs (ACL 2024)</sub>                                                                                     | 62227 | 62228 |   1 | 0.00% | `▁▁▁▁▃▃▄▆▆▇▇▇█` ⬆️ |
-| [localstack/localstack](https://github.com/localstack/localstack)<br/><sub>💻 A fully functional local AWS cloud stack. Develop and test your cloud & Serve…</sub>                                                                 | 62801 | 62802 |   1 | 0.00% | `▁▁▁▁▃▄▄▆▆▆▇▇█` ⬆️ |
-| [scikit-learn/scikit-learn](https://github.com/scikit-learn/scikit-learn)<br/><sub>scikit-learn: machine learning in Python</sub>                                                                                                 | 63985 | 63986 |   1 | 0.00% | `▁▁▁▁▁▁▁▄▄▄▄▄█` ⬆️ |
-| [labmlai/annotated_deep_learning_paper_implementations](https://github.com/labmlai/annotated_deep_learning_paper_implementations)<br/><sub>🧑‍🏫 60+ Implementations/tutorials of deep learning papers with side-by-side not…</sub> | 64235 | 64236 |   1 | 0.00% | `▁▁▁▁▂▃▄▆▆▆▆▇█` ⬆️ |
-| [swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)<br/><sub>A list of useful payloads and bypass for Web Application Security and Pentest/C…</sub>                                           | 71543 | 71544 |   1 | 0.00% | `▁▁▁▁▁▁▁▁▁▁▁▄█` ⬆️ |
-| [browser-use/browser-use](https://github.com/browser-use/browser-use)<br/><sub>🌐 Make websites accessible for AI agents. Automate tasks online with ease.</sub>                                                                   | 72383 | 72384 |   1 | 0.00% | `▁▁▁▁▂▄▄▄▄▆▇▇█` ⬆️ |
-| [microsoft/markitdown](https://github.com/microsoft/markitdown)<br/><sub>Python tool for converting files and office documents to Markdown.</sub>                                                                                 | 82838 | 82839 |   1 | 0.00% | `▁▁▁▁▁▂▂▅▅▆▇▇█` ⬆️ |
-| [pytorch/pytorch](https://github.com/pytorch/pytorch)<br/><sub>Tensors and Dynamic neural networks in Python with strong GPU acceleration</sub>                                                                                   | 94947 | 94947 |   0 | 0.00% | `▁▁▁▁▁▃▄▆▇▇███` ➡️ |
-| [fastapi/fastapi](https://github.com/fastapi/fastapi)<br/><sub>FastAPI framework, high performance, easy to learn, fast to code, ready for pro…</sub>                                                                             | 91762 | 91762 |   0 | 0.00% | `▁▁▂▃▅▅▅▆▆▆▆██` ➡️ |
-| [openai/whisper](https://github.com/openai/whisper)<br/><sub>Robust Speech Recognition via Large-Scale Weak Supervision</sub>                                                                                                     | 90663 | 90663 |   0 | 0.00% | `▁▂▁▂▃▃▃▇▇▇███` ➡️ |
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-## 新项目 - 中文
+COPY src/ /app/src/
+COPY .github/ /app/.github/
 
-暂无上榜新项目
+ENV GH_TOKEN=${GH_TOKEN}
 
-## 新项目 - 非中文
+CMD ["python", "-m", "src.run_all"]
+```
 
-暂无上榜新项目
+### Docker Compose
 
+```yaml
+version: '3.8'
+services:
+  starpulse:
+    build: .
+    environment:
+      - GH_TOKEN=${GH_TOKEN}
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+    restart: unless-stopped
+```
 
-<!-- END_AUTOGEN_RESULT -->
+## 使用方法
+
+### 查看每日榜单
+
+每日两次（北京时间 00:00 & 12:00）自动生成的 `README.md` 包含当日榜单，包括：
+
+- **星增长榜**：按 Star 增长排序的项目列表
+- **增幅榜**：按增长率排序的项目列表  
+- **新项目榜**：最近 30 天创建的项目列表
+- **中文/非中文分离**：双榜并行展示
+
+### 输出文件
+
+- `output/LATEST.md`：最新 Markdown 格式的榜单
+- `output/latest.json`：最新结构化数据
+- `data/snapshots/`：历史快照（JSON 格式）
+
+## 常见问题
+
+### Q: 为什么我的仓库没有出现在榜单上？
+A: 可能的原因包括：
+- 仓库 Star 数未达阈值（默认 MIN_STARS=200）
+- 最近一年无活动（pushedat 超过 365 天）
+- 被噪声过滤（超大仓库增量 < 2）
+
+### Q: 如何自定义候选仓库搜索？
+A: 修改 `src/config.py` 中的 `SearchConfig`：
+- 调整 `languages` 语言白名单
+- 调整 `topics` 主题白名单
+- 修改 `min_stars` 最低星门槛
+- 设置 `max_candidates` 候选上限
+
+### Q: GitHub API 速率限制怎么办？
+A: 建议设置 `GH_TOKEN`，token 有更高的速率上限。若候选量较大，项目会自动分页和限流。
+
+### Q: 如何修改运行时间？
+A: 修改 `.github/workflows/refresh.yml` 中的 cron 表达式：
+
+```yaml
+on:
+  schedule:
+    - cron: '0 4,16 * * *' # 北京时间 12:00 与 00:00
+```
+
+## 许可证
+
+MIT
+
+## 致谢
+
+数据来源于 GitHub 公共 API。项目受到以下开源项目的启发：
+- GitHub Trending
+- LLM 相关工具和库
